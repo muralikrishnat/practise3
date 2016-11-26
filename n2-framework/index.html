@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" n2-modal="app">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet/less" type="text/css" href="styles/global.less" />
+    <script src="vendor/bower_components/less/dist/less.js"></script>
+</head>
+
+<body>
+    <div class="flex-container">
+        <div n2-bind="Name"></div>
+        <div n2-bind="Project.Name"></div>
+        <div n2-repeat="Plans"></div>
+    </div>
+    <!--<script src="vendor/bower_components/jquery/dist/jquery.min.js"></script>-->
+    <script src="index.js"></script>
+    <script>
+        // var app = {};
+        // var getTimeStamp = function () {
+        //     return (new Date).getTime();
+        // };
+        // app.Names = ['Murali', 'krishna', 'chinna'];
+        // for(var i =0 ; i < 10000; i++) {
+        //     app.Names.push('Name ' + i);
+        // }
+        // var renderN2Repeat2 = function () {
+        //     $('[n2-repeat]').each(function () {
+        //         var $elem = $(this),
+        //             expr = $elem.attr('n2-repeat'),
+        //             prop = expr.indexOf(' in ') >= 0 ? expr.split(' in ')[1] : null,
+        //             timeStamp = (new Date).getTime();
+        //         var scope = $elem.closest('[n2-prop]').attr('n2-prop');
+        //         scope = window[scope];
+        //         if (prop && scope[prop] && scope[prop] instanceof Array && scope[prop].length > 0) {
+        //             var ngRepeatItems = [];
+        //             scope[prop].forEach(function (item) {
+        //                 var $elemClone = $elem.clone();
+        //                 $elemClone.removeAttr('n2-repeat').addClass('n2-scope');
+        //                 $elemClone.data('scope', item);
+        //                 $elemClone.find('[n2-bind]').each(function() {
+        //                     //TODO: Need more robust way
+        //                     $(this).html(item);
+        //                 });
+        //                 ngRepeatItems.push($elemClone);
+        //             });
+
+        //             // ngRepeatItems.forEach(function (elem) {
+        //             //     $elem.parent().append(elem);
+        //             // });
+        //             $elem.parent().append(ngRepeatItems);
+
+        //         } else {
+
+        //         }
+        //    });
+        // };
+        // var renderN2Repeat = function (elem, scope) {
+        //     var expr = elem.getAttribute('n2-repeat'),
+        //         prop = expr.indexOf(' in ') >= 0 ? expr.split(' in ')[1] : null,
+        //         timeStamp = (new Date).getTime();
+            
+        // };
+        // var renderN2RepeatAll = function () {
+        //     var n2RepeatElems = document.querySelectorAll('[n2-repeat]');
+        //     if (n2RepeatElems && n2RepeatElems.forEach) {
+        //         n2RepeatElems.forEach((elem) => {
+        //             renderN2Repeat(elem);
+        //         });
+        //     }
+        // };
+        // $(document).ready(function () {
+        //    renderN2RepeatAll();
+        // });
+
+        var lessLoaded = false,
+            domLoaded = false,
+            handleDomLoader = function () {
+                domLoaded = true;
+                if (domLoaded && lessLoaded) {
+                    init();
+                }
+            };
+        less.pageLoadFinished.then(function () {
+            lessLoaded = true;
+            if (domLoaded && lessLoaded) {
+                init();
+            }
+        });
+
+        window.document.onload = handleDomLoader;
+        window.onload = handleDomLoader;
+   </script>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+.generate-margins(@n, @i: 0) when (@i =< @n) {
+  .m@{i} {
+    margin: (@i * 1px);
+  }
+  .generate-margins(@n, (@i + 5));
+}
+
+.generate-margins-trbl(@n, @i: 0) when (@i =< @n) {
+  .m@{i}-top {
+    margin-top: (@i * 1px);
+  }
+  .m@{i}-right {
+    margin-right: (@i * 1px);
+  }
+  .m@{i}-btm {
+    margin-bottom: (@i * 1px);
+  }
+  .m@{i}-left {
+    margin-left: (@i * 1px);
+  }
+
+  .generate-margins-trbl(@n, (@i + 5));
+}
+
+.generate-margins(50);
+.generate-margins-trbl(50);

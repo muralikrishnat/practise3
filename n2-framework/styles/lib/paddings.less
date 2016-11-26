@@ -1,0 +1,26 @@
+.generate-paddings(@n, @i: 0) when (@i =< @n) {
+  .p@{i} {
+    padding: (@i * 1px);
+  }
+  .generate-paddings(@n, (@i + 5));
+}
+
+.generate-paddings-trbl(@n, @i: 0) when (@i =< @n) {
+  .p@{i}-top {
+    padding-top: (@i * 1px);
+  }
+  .p@{i}-right {
+    padding-right: (@i * 1px);
+  }
+  .p@{i}-btm {
+    padding-bottom: (@i * 1px);
+  }
+  .p@{i}-left {
+    padding-left: (@i * 1px);
+  }
+
+  .generate-paddings-trbl(@n, (@i + 5));
+}
+
+.generate-paddings(50);
+.generate-paddings-trbl(50);

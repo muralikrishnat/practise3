@@ -1,0 +1,99 @@
+.displayflex {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: -moz-flexbox;
+    display: flex;
+}
+
+.flex-direction (@direction: row) {
+    -webkit-flex-direction: @direction;
+        -ms-flex-direction: @direction;
+        -moz-flex-direction: @direction;
+            flex-direction: @direction;
+}
+
+
+.display-container {
+    .displayflex();
+}
+
+/* ** Start Global Styles * */
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+.full-height {
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+}
+/* ** End Global Styles * */
+
+
+/* *** Start PADDINGS and MARGINS **** */
+.generate-paddings(@n, @i: 0) when (@i =< @n) {
+  .p@{i} {
+    padding: (@i * 1px);
+  }
+  
+  .generate-paddings(@n, (@i + 5));
+}
+.generate-paddings-trbl(@n, @i: 0) when (@i =< @n) {
+  .p@{i}-top {
+      padding-top: (@i * 1px);
+  }
+  .p@{i}-btm {
+      padding-top: (@i * 1px);
+  }
+  .p@{i}-right {
+      padding-top: (@i * 1px);
+  }
+  .p@{i}-left {
+      padding-top: (@i * 1px);
+  }
+  .generate-paddings-trbl(@n, (@i + 5));
+}
+
+
+.generate-margins(@n, @i: 0) when (@i =< @n) {
+  .m@{i} {
+    margin: (@i * 1px);
+  }
+  .generate-margins(@n, (@i + 5));
+}
+
+.generate-margins-trbl(@n, @i: 0) when (@i =< @n) {
+  .m@{i}-top {
+    margin-top: (@i * 1px);
+  }
+  .m@{i}-right {
+    margin-right: (@i * 1px);
+  }
+  .m@{i}-btm {
+    margin-bottom: (@i * 1px);
+  }
+  .m@{i}-left {
+    margin-left: (@i * 1px);
+  }
+
+  .generate-margins-trbl(@n, (@i + 5));
+}
+
+
+
+.generate-paddings(50);
+.generate-paddings-trbl(50);
+
+.generate-margins(50);
+.generate-margins-trbl(50);
+
+/* *** End PADDINGS and MARGINS **** */
+
+
+
+.standard-layout {
+    .displayflex();
+    .flex-direction(column);
+}
