@@ -188,7 +188,7 @@ var renderElem = function () {
                 init();
             }
         };
-    if (less) {
+    if (typeof less !== 'undefined') {
         less.pageLoadFinished.then(function () {
             lessLoaded = true;
             if (domLoaded && lessLoaded) {
