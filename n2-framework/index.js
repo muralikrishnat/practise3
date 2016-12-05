@@ -136,6 +136,11 @@ var renderElem = function () {
             if (!elemCache[elem.N2Id]) {
                 elemCache[elem.N2Id] = {};
             }
+
+            if (!key && !val) {
+                return elemCache[elem.N2Id];
+            }
+
             if (val) {
                 elemCache[elem.N2Id][key] = val;
             } else {

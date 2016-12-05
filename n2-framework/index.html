@@ -13,6 +13,7 @@
 <body>
     <div class="flex-container">
         <div n2-bind="Name"></div>
+        <div n2-bind="Name2"></div>
         <div n2-bind="Project.Name"></div>
         <div n2-repeat="plan in Plans">
             <div n2-bind="plan.Name"></div>
@@ -27,6 +28,7 @@
         core.init(function (modal) {
             var app = modal('app', {});
             app.set('app.Name', 'Murali');
+            app.set('app.Name2', 'Madhu');
             app.set('app.Project.Name', 'N2-Framework').set('app.Plans', [
                 {
                     Name: 'Plan 1',
