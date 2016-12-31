@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" n2-modal="app">
+<html lang="en" n2-path="app">
 
 <head>
     <title></title>
@@ -25,8 +25,8 @@
     <!--<script src="vendor/bower_components/jquery/dist/jquery.min.js"></script>-->
     <script src="index.js"></script>
     <script>
-        core.init(function (modal) {
-            var app = modal('app', {});
+        core.init(function (n2Path) {
+            var app = n2Path('app', {});
             app.set('app.Name', 'Murali');
             app.set('app.Name2', 'Madhu');
             app.set('app.Project.Name', 'N2-Framework').set('app.Plans', [

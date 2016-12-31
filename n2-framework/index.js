@@ -115,7 +115,7 @@ var renderElem = function () {
         };
         HTMLElement.prototype.render = function () {
             var elem = this;
-            var scopePath = elem.attr('n2-modal') || elem.attr('data-n2-modal');
+            var scopePath = elem.attr('n2-path') || elem.attr('data-n2-path');
             if (scopePath) {
                 var scope = modal(scopePath);
                 if (scope) {
