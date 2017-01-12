@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="full-height">
 
-<head >
+<head>
     <title></title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,28 +11,37 @@
 
 <body class="full-height">
     <div class="flex-container full-height">
-         <div class="top-bar">Header</div>
-         <div class="main-content">
-             <div class="left-bar">L</div>
-             <div class="right-bar photo-editor">
-                 <div class="photo-frame"></div>
-                 <div class="photo-frame"></div>
-             </div>
-         </div>
+        <div class="top-bar">Header</div>
+        <div class="main-content">
+            <div class="left-bar">L</div>
+            <div class="right-bar photo-editor">
+                <div class="photo-frame"></div>
+                <div class="photo-frame"></div>
+            </div>
+        </div>
+        <div style="height:300px;" id="canvas-id">
+
+        </div>
     </div>
 
 
     <script src="vendor/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="vendor/pre-build/html2canvas.js"></script>
+    <script src="app.js"></script>
     <script>
-        
-        $(document).ready(function() {
+        $(document).ready(function () {
             document.querySelector('.photo-editor').addEventListener("wheel", function (e) {
-                 console.log('u scrolled', e.deltaX, e.deltaY, e.deltaZ);
+                console.log('u scrolled', e.deltaX, e.deltaY, e.deltaZ);
             });;
 
-            $('.photo-editor').on('mousedown', '.photo-frame', function () {
-                console.log('muse down');
+            $('.photo-editor').on('mousedown', '.photo-frame', function (e) {
+                $('.selected').removeClass('selected');
+                $(this).addClass('selected');
+                _drag_init(this);
             });
+
+
+
         });
     </script>
 

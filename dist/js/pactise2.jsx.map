@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../react-practise/js/pactise2.jsx"],"names":["Comp1","React","Component","render"],"mappings":"AAAA,MAAMA,KAAN,SAAoBC,MAAMC,SAA1B,CAAoC;AAChCC,aAAU;AACN,eAAO;AAAA;AAAA;AAAA;AAAA,SAAP;AACH;AAH+B","file":"pactise2.jsx","sourcesContent":["class Comp1 extends React.Component {\r\n    render () {\r\n        return <h1>Heading</h1>\r\n    }\r\n}"]}

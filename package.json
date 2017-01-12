@@ -1,0 +1,30 @@
+{
+  "name": "practise3",
+  "version": "1.0.0",
+  "description": "Practise 3",
+  "main": "index.js",
+  "dependencies": {
+    "grunt": "^1.0.1",
+    "grunt-babel": "^6.0.0",
+    "load-grunt-tasks": "^3.5.2",
+    "node-static": "^0.7.9"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.1.5",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muralikrishnat/practise3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/muralikrishnat/practise3/issues"
+  },
+  "homepage": "https://github.com/muralikrishnat/practise3#readme"
+}

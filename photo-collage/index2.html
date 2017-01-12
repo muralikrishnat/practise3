@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html,
+        body,
+        .full-height {
+            height: 100%;
+        }
+        
+        .top-bar {
+            height: 35px;
+        }
+        
+        .photo-editor {
+            height: calc(100% - 35px);
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .layer {
+            width: 100px;
+            height: 100px;
+            border: 4px dotted transparent;
+            background-color: lightblue;
+            position: absolute;
+        }
+        /*.layer.selected {
+            border-color: #eee;
+        }*/
+        
+        .layer.box-shadow {
+            box-shadow: 0px 0px 4px #eee;
+        }
+        
+        .overlays,
+        .menu {
+            position: fixed;
+            top: 100%;
+            background-color: #445544;
+            box-shadow: 0px 0px 4px #000;
+            padding: 20px;
+        }
+        
+        ul {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .menu .close {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="full-height">
+        <div class="top-bar">
+            <button type="button" onclick="photoEditor.addLayer('photo-frame')">Add Frame </button>
+            <button type="button" onclick="photoEditor.openMenu('edit', this)">Edit</button>
+            <button type="button" onclick="photoEditor.unselectLayer()">Unselect</button>
+            <button type="button" onclick="photoEditor.renderLayers()">Refresh</button>
+        </div>
+        <div class="photo-editor">
+
+        </div>
+        <div class="overlays">
+            <div class="menu edit">
+                <div>
+                    <button onclick="photoEditor.closeMenu(this)" class="close">Close</button>
+                </div>
+                <ul>
+                    <li>Width: <input type="text" data-menu-style="width"></li>
+                    <li>Height: <input type="text" data-menu-style="height"></li>
+                    <li>Background-color: <input type="text" data-menu-style="background-color" /></li>
+                    <li>
+                        <button onclick="photoEditor.updateLayer(this)">Update</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="photo-editor.js"></script>
+</body>
+
+</html>

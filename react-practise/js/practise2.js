@@ -4,8 +4,9 @@ class TabsComp extends React.Component {
     }
 
     render () {
+        var colorCls = this.props.name;
         return (
-            <div>
+            <div className={colorCls}>
                 { this.props.children }
             </div>
         );
@@ -15,8 +16,9 @@ class TabsComp extends React.Component {
 
 class App extends React.Component {
     render () {
+        var str = 'container';
         return (
-            <TabsComp><div>Tab1</div><div>Tab2</div> </TabsComp>
+            <TabsComp name={str}><div>Tab1</div><div>Tab2</div> </TabsComp>
         );
     }
 }

@@ -23,16 +23,14 @@ class Comp1 extends React.Component {
         this.state = {
             count: 0
         };
-        this.increaseCount = this
-            .increaseCount
-            .bind(this);
+        this.increaseCount = this.increaseCount.bind(this);
     }
     componentWillMount() {
         console.log('Component WILL MOUNT!')
     }
 
     componentDidMount() {
-        console.log('Component DID MOUNT!')
+        console.log('Component DID MOUNT!');
     }
 
     componentWillReceiveProps(newProps) {
@@ -74,10 +72,11 @@ class Comp1 extends React.Component {
                 <div>This is comp1 {this.state.count}</div>
                 <ul>{rows}</ul>
             </div>
-
         );
     };
 }
+
+
 
 var Comp2 = React.createClass({
     getInitialState: function () {

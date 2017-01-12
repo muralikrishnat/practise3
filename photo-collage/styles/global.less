@@ -30,15 +30,22 @@
 
 .photo-editor {
     position: relative;
+    overflow: hidden;
     .photo-frame {
         height: 200px;
         width: 200px;
         background-color: green;
         border: 1px solid red;
         position: absolute;
+        cursor: move;
     }
 }
 
 div {
     border: 1px solid red;
+}
+
+
+.selected {
+    border: 10px solid black !important;
 }
