@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            border: 1px solid red;
+            margin: 10px 30px;
+        }
+        
+        .col8 {
+            width: 80%;
+            border-right: 1px solid black;
+        }
+        
+        .col2 {
+            width: 20%;
+        }
+        
+        .left-box,
+        .right-box {
+            min-height: 600px;
+            float: left;
+        }
+        
+        .clearfix {
+            overflow: hidden;
+        }
+        
+        .clearfix:after {
+            clear: both
+        }
+        
+        .input-box {
+            flex: 0 0 50px;
+        }
+        
+        .messages-box {
+            flex: 20 1 auto;
+            padding: 5px 15px;
+        }
+        
+        .txtMessage {
+            flex-grow: 1;
+            align-self: stretch;
+            padding-left: 20px;
+        }
+        
+        .display-flex {
+            display: flex;
+        }
+        
+        .flex-vertical {
+            flex-direction: column;
+        }
+        
+        .text-align {
+            text-align: center;
+        }
+        
+        .online-users,
+        .messages {
+            list-style: none;
+        }
+        
+        .online-users li {
+            padding: 5px 10px;
+            border: 1px solid transparent;
+        }
+        
+        .online-users li:hover {
+            border: 1px solid grey;
+            box-shadow: 0px 0px 6px #222;
+        }
+    </style>
+</head>
+
+<body onload="initApp()">
+    <div class="container">
+        <div class="chat-box clearfix">
+            <div class="left-box col8 display-flex flex-vertical">
+                <div class="messages-box">
+                    <ul class="messages">
+                    </ul>
+                </div>
+                <div class="input-box display-flex">
+                    <input type="text" class="txtMessage" />
+                </div>
+            </div>
+            <div class="right-box col2">
+                <h3 class="text-align">Online Users</h3>
+                <ul class="online-users">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var $ = (selector) => {
+            return document.querySelector(selector);
+        };
+        var wsClient = null;
+        var currentUser = null,
+            messagesRendered = false;
+
+        var renderUsers = (users) => {
+            var $onlineUsers = $('.online-users');
+            $onlineUsers.innerHTML = '';
+            users.forEach((user) => {
+                var $userElem = document.createElement('li');
+                $userElem.innerHTML = user.Name;
+                $onlineUsers.appendChild($userElem);
+            });
+        };
+
+        var renderMessages = (messages) => {
+            var $messages = $('.messages');
+            $messages.innerHTML = '';
+            messages.forEach((msg) => {
+                var $msgElem = document.createElement('li');
+                $msgElem.innerHTML = `${msg.Sender} : ${msg.Msg}`;
+                $messages.appendChild($msgElem);
+            });
+        }
+
+        var renderMessage = (msg) => {
+            var $messages = $('.messages');
+            var $msgElem = document.createElement('li');
+            $msgElem.innerHTML = `${msg.Sender} : ${msg.Msg}`;
+            $messages.appendChild($msgElem);
+        };
+
+        var appendUser = (user) => {
+            var $onlineUsers = $('.online-users');
+            var $userElem = document.createElement('li');
+            $userElem.innerHTML = user.Name;
+            $onlineUsers.appendChild($userElem);
+        };
+        var connectWS = () => {
+            wsClient = new WebSocket("ws://localhost:3434");
+            wsClient.onmessage = (event) => {
+                console.log('Recevied Data ', event.data);
+                var { broadCastType, Messages, Users } = JSON.parse(event.data);
+                if (broadCastType.IsNewUser) {
+                    if (broadCastType.CurrentUser) {
+                        currentUser = broadCastType.CurrentUser;
+                        renderUsers(Users);
+                    } else {
+                        appendUser(broadCastType.addedUser);
+                    }
+                } else if (broadCastType.IsNewMessage) {
+                    renderMessage(broadCastType.AddedMessage);
+                }
+
+                if (broadCastType.LoadMessages) {
+                    renderMessages(Messages);
+                }
+
+            };
+        };
+
+        var bindEvents = () => {
+            $('.txtMessage').addEventListener('keydown', (event) => {
+                if (event.code === 'Enter' && wsClient && currentUser) {
+                    var requestObj = {
+                        Sender: currentUser.Name,
+                        Msg: $('.txtMessage').value
+                    };
+                    $('.txtMessage').value = '';
+                    wsClient.send(JSON.stringify(requestObj));
+                }
+            });
+        }
+        var initApp = () => {
+            bindEvents();
+            connectWS();
+        }
+    </script>
+</body>
+
+</html>

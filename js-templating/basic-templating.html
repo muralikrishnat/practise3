@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <div id="root">
+        <div>{{ Title }}</div>
+        <div>
+            <div data-title="{{Title}}">{{Title}} has {{Heroes.length}} Heroes</div>
+        </div>
+    </div>
+
+    
+    <fieldset style="border: 1px silid #eee;">
+        <legend>Developer Control Panel</legend>
+        <div>
+            <button onclick="renderAgainWithNewHero()">Render With New Hero</button>
+        </div>
+    </fieldset>
+    <script>
+        //JS templating 
+        //converting data to view with html template
+        var viewEngine = (() => {
+            class Engine {
+                compilePlaceHolders(templateStr, scope) {
+                    //finding the template placeholders '{{xxxx}}' and loop each and every occurance
+                    return templateStr.replace(/\{{([^{}]*)}}/g, (a, b) => {
+                        var expr = b.replace(/ /g, ''),
+                            val = scope[expr];
+                        //condition to handle "Property.Property"
+                        if (b.indexOf('.') > 0) {
+                            var exprlst = b.split('.'),
+                                resultedVal = scope;
+                            exprlst.forEach((g) => {
+                                //checking is value exists in scope property
+                                //i.e., app["Heroes"] and again Heroes["length"]
+                                if (resultedVal[g]) {
+                                    resultedVal = resultedVal[g];
+                                }
+                            });
+                            val = resultedVal;
+                        }
+                        return val ? val : '';
+                    });
+                }
+                render(appData, rootSelector) {
+                    var rootElem = document.querySelector(rootSelector);
+                    if (rootElem) {
+                        //looping through childNodes to replace template placeholders
+                        document.querySelector('#root').childNodes.forEach((n) => {
+                            if (!n.template) {
+                                //Storing text as template, it can be used to replace later
+                                n.template = n.textContent;
+                            };
+                            n.textContent = this.compilePlaceHolders(n.template, appData)
+                        });
+                    }
+                }
+            }
+
+            return new Engine();
+        })();
+
+        var app = {
+            Title: 'Flash',
+            Heroes: [
+                {
+                    Name: 'Flash'
+                },
+                {
+                    Name: 'Cisco'
+                }
+            ]
+        };
+
+        viewEngine.render(app, '#root');
+
+        var renderAgainWithNewHero = () => {
+            //Adding one more Hero to Heros
+            app.Heroes.push({ Name: 'Catilin' });
+
+            //Calling view Engine to render updated data
+            viewEngine.render(app, '#root');
+        };
+    </script>
+</body>
+
+</html>
