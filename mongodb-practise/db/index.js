@@ -1,5 +1,5 @@
 var { MongoClient, ObjectID } = require('mongodb');
-var mongodbUrl = 'mongodb://localhost:27017/PractiseDB';
+var mongodbUrl = 'mongodb://192.168.0.99:27017/PractiseDB';
 
 var dbObject = null;
 var checkAndConnect = () => {

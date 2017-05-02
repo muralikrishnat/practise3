@@ -118,7 +118,6 @@ var EmployeeManager = {
                         db.close();
                     });
                 } else {
-                    console.log('err ', err);
                     res({ err });
                     db.close();
                 }

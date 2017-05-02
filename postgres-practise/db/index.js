@@ -10,13 +10,7 @@ var config = {
     idleTimeoutMillis: 30000,
 };
 
-
-var employeeInsert = `insert into employee (firstname, lastname, empid, password, personalemailid, emailid, designation, reportingmanger, practise, practiserole)
-values($1, $2, $3, $4, $5, $6, $7,$8, $9, $10)`;
-var employeeSelect = 'select id,firstname, lastname, empid, personalemailid, emailid, designation, reportingmanger, practise, practiserole from employee';
 var pool = new pg.Pool(config);
-
-
 
 var checkAndConnect = () => {
     return new Promise((res, rej) => {
@@ -565,7 +559,34 @@ module.exports = {
             });
         });
     },
-
+    approveTimesheets: ({
+        ids,
+        isapproved
+    }) => {
+        return new Promise((res, rej) => {
+            checkAndConnect().then(({ err, client, done }) => {
+                var queryToExec = `update timesheets set `;
+                if (isapproved) {
+                    queryToExec = queryToExec + ` isapproved=true, declinedcount=0 `;
+                } else {
+                    queryToExec = queryToExec + ` isapproved=false, declinedcount=1 `;
+                }
+                queryToExec = queryToExec + ` where id in (${ids})`;
+                client.query(queryToExec, (cErr, result) => {
+                    done();
+                    if (!cErr) {
+                        if (result.rowCount) {
+                            res({ err: cErr, result: "" });
+                        } else {
+                            res({ err: { code: 601, msg: 'Updation failed' } });
+                        }
+                    } else {
+                        res({ err: cErr, result });
+                    }
+                });
+            });
+        });
+    },
     updateTimesheet: ({
         id,
         empid = '',
@@ -587,7 +608,11 @@ module.exports = {
                 var queryToExec = 'update timesheets ',
                     setArr = [];
                 if (loggedUser) {
-                    setArr.push(` loggedhours=${loggedhours} `);
+                    if (loggedhours) {
+                        setArr.push(` loggedhours=${loggedhours} `);
+                    }
+                    setArr.push(` isapproved=${isapproved} `);
+
                     queryToExec = queryToExec + ' set ' + setArr.join(' , ') + ` where id=${id}`;
                     client.query(queryToExec, (cErr, result) => {
                         done();

@@ -51,7 +51,8 @@ var {
     addProject,
     deleteEmployee,
     deleteProject,
-    updateTimesheet
+    updateTimesheet,
+    approveTimesheets
  } = require('./db');
 var server = restify.createServer();
 server.use(restify.acceptParser(server.acceptable));
@@ -218,8 +219,8 @@ server.get('/timesheets', function (req, res, next) {
 server.post('/timesheets', function (req, res, next) {
     if (req.loggedUser) {
         req.params.loggedUser = req.loggedUser;
-        if (req.params.empid == req.loggedUser.empid) {
-            if (req.params.empid && req.params.projectid && req.params.loggedhours && req.params.timesheetdate) {
+        if (req.params.empid == req.loggedUser.empid || req.loggedUser.role == 'admin') {
+            if (req.params.empid && req.params.projectid && req.params.timesheetdate) {
                 if (req.params.id) {
                     updateTimesheet(req.params).then(({ err, result }) => {
                         res.send({ err, result });
@@ -242,13 +243,21 @@ server.post('/timesheets', function (req, res, next) {
     return next();
 });
 
+server.post('/approvetimesheets', function (req, res, next) {
+    req.params.loggedUser = req.loggedUser;
+    approveTimesheets(req.params).then(({ err, result }) => {
+        res.send({ err, result });
+    });
+    return next();
+});
+
 server.post('/echo/:name', function (req, res, next) {
     res.send(req.params);
     return next();
 });
 
 var defaultHandler = function (req, res, next) {
-    res.send({ 'Build Number ': '0.1.10'});
+    res.send({ 'Build Number ': '0.1.10' });
     return next();
 };
 server.get('/', defaultHandler);

@@ -1,5 +1,5 @@
 // require('./fe-server')({ fePort: 3434, folder: 'react-practise' });
-require('./fe-server')({ fePort: 3434, folder: 'mongodb-practise' });
+require('./fe-server')({ fePort: 3435, folder: 'slickquiz' });
 
 
 // var { createServer } = require('http');
