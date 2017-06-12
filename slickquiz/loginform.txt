@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            background-color: #787878;
+        }
+        
+        .container {
+            width: 100%;
+            position: relative;
+        }
+        
+        .login-form {
+            width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #ececec;
+            border: 2px solid #ECECE5;
+            box-shadow: 0px 0px 24px #ECECED;
+            top: 200px;
+            position: relative;
+            height: 140px;
+            padding: 30px;
+        }
+        
+        .field-row {
+            clear: both;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .field-label {
+            float: left;
+            width: 150px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-form">
+            <div class="field-row">
+                <div class="field-label">Name</div>
+                <div class="field-value">
+                    <input type="text" />
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">Password</div>
+                <div class="field-value">
+                    <input type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

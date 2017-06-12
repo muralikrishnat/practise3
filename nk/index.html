@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" class="full-height">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            20% {
+                transform: scale(2);
+                opacity: 0.8;
+            }
+            40% {
+                transform: scale(4);
+                opacity: 0.6;
+            }
+            60% {
+                transform: scale(6);
+                opacity: 0.4;
+            }
+            80% {
+                transform: scale(8);
+                opacity: .2;
+            }
+            100% {
+                transform: scale(10);
+                opacity: 0;
+            }
+        }
+        
+        .bounceme {
+            animation-name: bounceIn;
+            animation-duration: 1s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+            animation-direction: normal;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            top: 12%;
+            left: 30%;
+            border-radius: 50%;
+        }
+        
+        .full-height {
+            height: 100%;
+        }
+        
+        .pos-rel {
+            position: relative;
+        }
+        
+        @keyframes frameOut {
+            0% {
+                opacity: 0;
+                transform: scale(2);
+            }
+            20% {
+                opacity: 0.8;
+                transform: scale(2);
+            }
+            40% {
+                transform: scale(2);
+                opacity: 1;
+            }
+            60% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            80% {
+                transform: scale(.5);
+                opacity: .4;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .frame {
+            /*animation-name: frameOut;
+            animation-duration: 2s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+            animation-direction: normal;*/
+            position: absolute;
+            width: 100px;
+            height: 150px;
+            background-color: red;
+            top: 30%;
+            left: 30%;
+        }
+        
+        @keyframes hideme {
+            0% {
+                left: 0px;
+            }
+            100% {
+                left: 200px;
+            }
+        }
+        
+        .frame:hover {
+            animation-name: hideme;
+            animation-duration: 100s;
+            animation-iteration-count: infinite;
+        }
+        
+        .squash {
+            height: 100px;
+            background-color: #ececec;
+            border: 1px solid black;
+            width: 100%;
+        }
+        
+        .squash:hover,
+        .squash:focus {
+            height: 0px;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body class="full-height pos-rel">
+    <div class="full-height pos-rel">
+        <!--<div class="bounceme"></div>-->
+
+        <button tabindex="1" class="squash">
+            test
+        </button>
+        <button tabindex="2" class="squash">
+            dsgdgfdg
+        </button>
+        <button tabindex="3" class="squash">
+            dfgfdgfdgfd
+        </button>
+    </div>
+    <script>
+
+    </script>
+</body>
+
+</html>

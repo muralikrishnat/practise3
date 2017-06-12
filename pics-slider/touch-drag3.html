@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            border: 1px solid red;
+            position: relative;
+        }
+        
+        .container.dragStart {
+            position: fixed;
+        }
+        
+        .dd-row {
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .dd-box {
+            float: left;
+        }
+        
+        .dd-box.active {
+            border: 2px dashed red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+    </div>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var rows = [];
+        var boxes = [];
+        var widgetcount = 0;
+        var Widget = function (obj) {
+            this.pos = obj['pos'];
+            this.w = obj['w'];
+            this.h = obj['h'];
+            this.bColor = ('#' + Math.round(Math.random() * 1000));
+            this.brColor = ('#' + Math.round(Math.random() * 1000));
+            widgetcount = widgetcount + 1;
+        };
+
+
+        rows.push([new Widget({ pos: 0, w: 1, h: 1 }), new Widget({ pos: 1, w: 1, h: 1 }), new Widget({ pos: 2, w: 1, h: 1 })]);
+        rows.push([new Widget({ pos: 0, w: 1, h: 1 }), new Widget({ pos: 1, w: 1, h: 1 }), new Widget({ pos: 2, w: 1, h: 1 })]);
+        // rows.push([new Widget({ pos: 0, w: 1, h: 1 }), new Widget({ pos: 1, w: 2, h: 2 })]);
+        // rows.push([new Widget({ pos: 0, w: 1, h: 2 }), new Widget({ pos: 1, w: 1, h: 1 }), new Widget({ pos: 1, w: 1, h: 1 })]);
+        // rows.push([new Widget({ pos: 0, w: 1, h: 1 }), new Widget({ pos: 1, w: 1, h: 2 }), new Widget({ pos: 1, w: 1, h: 1 })]);
+
+
+        var renderContainer = function () {
+            var $container = $('.container');
+            $container.html('');
+            for (var r = 0, rlen = rows.length; r < rlen; r++) {
+                var cols = rows[r];
+                var $row = $('<div/>').addClass('dd-row');
+                if (cols && cols instanceof Array) {
+                    for (var c = 0, clen = cols.length; c < clen; c++) {
+                        var box = cols[c];
+
+                        var $box = $('<div/>').addClass('dd-box');
+                        $box.css({
+                            width: (box.w * boxWidth),
+                            height: (box.h * boxHeight),
+                            backgroundColor: box.bColor,
+                            border: '1px solid ' + box.brColor
+                        });
+                        $box.html(`row-${r}; col-${c}`);
+                        $row.append($box);
+                    }
+                }
+                $container.append($row);
+            }
+        };
+        var getWidgetByCords = function (x, y) {
+            $('.dd-row').each((i, elem) => {
+                var $elem = $(elem);
+                if (y >= $(elem).offset().top && y < ($(elem).offset().top + $(elem).outerHeight())) {
+                    $elem.css({ border: '2px solid red' });
+                } else {
+                    $elem.css({ border: 'none' });
+                }
+            });
+        };
+
+        var touchDragTime = null, oldScroll, dragMoving;
+        var bindEvents = function () {
+
+            $('.dd-box').on('touchstart', function (e) {
+                touchDragTime = new Date();
+            });
+
+            $('.dd-box').on('touchend', function (e) {
+                var tdiff = new Date() - touchDragTime;
+                var ss = (tdiff / 1000);
+                touchDragTime = null;
+                $('.container').removeClass('dragStart');
+                $('.container').css({ top: 0 });
+                $(window).scrollTop(oldScroll);
+                dragMoving = false;
+            });
+        };
+
+        var containerWidth, boxWidth, boxHeight, touchX, touchY;
+        $(document).ready(function () {
+            containerWidth = $('.container').width();
+            boxWidth = containerWidth / 3;
+            boxHeight = boxWidth;
+
+            renderContainer();
+            bindEvents();
+
+            $(window).on('touchmove', function (e) {
+                var tdiff = 0;
+                if (touchDragTime && !dragMoving) {
+                    tdiff = new Date() - touchDragTime;
+                    if (tdiff > 100) {
+                        dragMoving = true;
+                        oldScroll = $(window).scrollTop();
+                        $('.container').addClass('dragStart');
+                        $('.container').css({ top: -oldScroll });
+                    }
+                }
+                if (e.touches.length > 0) {
+                    touchX = e.touches[0].clientX;
+                    touchY = e.touches[0].clientY;
+                    if (dragMoving) {
+                        var lowerDiff = $(window).height() - touchY;
+                        if (lowerDiff < 20) {
+                            oldScroll = oldScroll + 10;
+                            $('.container').css({ top: -oldScroll });
+                        } else if (touchY < 40) {
+                            if (oldScroll - 10 >= 0) {
+                                oldScroll = oldScroll - 10;
+                                $('.container').css({ top: -oldScroll });
+                            }
+                        }
+                        getWidgetByCords(touchX, touchY);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

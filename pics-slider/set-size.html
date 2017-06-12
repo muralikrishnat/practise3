@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .customer-home {
+            position: relative;
+        }
+        
+        .base-image {
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+        
+        .point {
+            position: absolute;
+            background-color: green;
+            width: 20px;
+            height: 20px;
+            border-radius: 25px;
+        }
+        
+        .door {
+            position: absolute;
+            background-color: grey;
+            border: 2px solid black;
+        }
+        
+        .resizer {
+            width: 40px;
+            height: 40px;
+            border-radius: 25px;
+            background-color: white;
+            box-shadow: 0px 0px 0px #152514;
+            position: absolute;
+            opacity: 0.5;
+            border: 5px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <input type="file" onchange="uploadFile(this)" />
+    </div>
+    <div class="customer-home">
+        <div class="home-canvas-container"></div>
+        <div class="door-controls"></div>
+    </div>
+
+    <div>
+        <input type="button" onclick="saveHome()" value=" Finished " />
+    </div>
+
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var uploadFile = function (e) {
+            handleImage(e);
+        };
+
+        function Point(x, y, p) {
+            this.x = x;
+            this.y = y;
+            this.position = p;
+        }
+
+        function Door(w, h, l, t) {
+            this.w = w;
+            this.h = h;
+            this.l = l;
+            this.t = t;
+
+            this.id = doors.length + 1;
+            this.$elem = null;
+            this.$resizer = null;
+        }
+
+        var getDoor = ({ w = 100, h = 100, l = 50, t = 50 }) => {
+            var $door = $('<div class="door"/>');
+
+            $door.css({
+                'width': w + 'px',
+                'height': h + 'px',
+                'left': l + 'px',
+                'top': t + 'px'
+            });
+
+            // $('.customer-home').append($door);
+            return $door;
+        };
+
+        var drawPoints = () => {
+            var points = [];
+            points.push(new Point(50, 50));
+            points.push(new Point(150, 50));
+            points.push(new Point(50, 150));
+            points.push(new Point(150, 150));
+
+            points.forEach((p) => {
+                var $p = $('<div class="point"/>');
+                $p.css({
+                    left: p.x,
+                    top: p.y
+                })
+
+                $('.customer-home').append($p);
+            });
+        };
+
+
+        var setDoorSize = () => {
+            doors.forEach(d => {
+                if (d.$resizer) {
+                    var leftToMinus = $('.customer-home').offset().left;
+                    var topToMinus = $('.customer-home').offset().top;
+                    d.$elem.css({
+                        'width': (d.$resizer.offset().left - (d.$elem.offset().left - 25)) + 'px',
+                        'height': (d.$resizer.offset().top - (d.$elem.offset().top - 25)) + 'px'
+                    });
+                }
+            });
+        };
+
+        var setResizer = () => {
+            doors.forEach(d => {
+                if (d.$resizer) {
+                    var leftToMinus = $('.customer-home').offset().left;
+                    var topToMinus = $('.customer-home').offset().top;
+                    d.$resizer.css({
+                        'left': (d.$elem.offset().left + d.$elem.width() - leftToMinus - 25) + 'px',
+                        'top': (d.$elem.offset().top + d.$elem.height() - topToMinus - 25) + 'px'
+                    });
+
+                }
+            });
+        }
+        var getResizer = (d) => {
+            var $resizer = $('<div class="resizer"/>');
+            var leftToMinus = $('.customer-home').offset().left;
+            var topToMinus = $('.customer-home').offset().top;
+            $resizer.css({
+                'left': (d.$elem.offset().left + d.$elem.width() - leftToMinus - 25) + 'px',
+                'top': (d.$elem.offset().top + d.$elem.height() - topToMinus - 25) + 'px'
+            });
+
+            return $resizer;
+        };
+
+        var doors = [];
+        function doorInit() {
+            $('.door-controls').html('');
+            doors.push(new Door(100, 100, 50, 50));
+
+            doors.forEach(d => {
+                var $d = getDoor(d);
+                d.$elem = $d;
+                $('.door-controls').append($d);
+                d.$resizer = getResizer(d);
+                $('.door-controls').append(d.$resizer);
+            });
+
+            bindEvents();
+        }
+
+
+        function handleImage(e) {
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var img = new Image();
+                img.onload = function () {
+                    var canvasTags = $('<canvas class="base-image"/>');
+                    var canvas = canvasTags[0];
+                    let w = $(window).width();
+                    let h = $(window).width();
+                    canvas.setAttribute('width', w);
+                    canvas.setAttribute('height', h);
+                    var nCanvas2d = canvas.getContext('2d');
+                    nCanvas2d.drawImage(img, 0, 0, w - 10, h - 10);
+                    $('.customer-home').html('').append(canvas);
+
+                    doorInit();
+                }
+                img.src = event.target['result'];
+            }
+
+            let files = e.target ? e.target.files : e.files;
+            if (files) {
+                reader.readAsDataURL(files[0]);
+            }
+        }
+
+        var dragElem,
+            touchX = 0,
+            touchY = 0,
+            mx = 0,
+            my = 0,
+            resizeElem,
+            rx = 0,
+            ry = 0;
+        var bindEvents = function () {
+            $('.door').on('touchstart', function (e) {
+                dragElem = e.target;
+                mx = touchX;
+                my = touchY;
+            });
+
+            $('.door').on('touchend', function (e) {
+                dragElem = null;
+            });
+
+            $('.resizer').on('touchstart', function (e) {
+                resizeElem = e.target;
+                rx = touchX;
+                ry = touchY;
+            });
+
+            $('.resizer').on('touchend', function (e) {
+                resizeElem = null;
+            });
+        };
+
+        $(document).on('touchmove', function (e) {
+            touchX = e.touches[0].clientX;
+            touchY = e.touches[0].clientY;
+            if (e.touches.length > 0) {
+                if (dragElem) {
+                    $(dragElem).css({
+                        'left': (touchX - 50) + 'px',
+                        'top': (touchY - 50) + 'px'
+                    });
+
+                    setResizer();
+                } else if (resizeElem) {
+                    $(resizeElem).css({
+                        'left': (touchX - 50) + 'px',
+                        'top': (touchY - 50) + 'px'
+                    });
+
+                    setDoorSize();
+                }
+            }
+        });
+        var selectedHome = {
+            src: 'Chrysanthemum.jpg',
+            width:0,
+            height:0,
+            
+        };
+        (() => {
+            var img = new Image();
+            img.onload = function () {
+                var canvasTags = $('<canvas class="base-image"/>');
+                var canvas = canvasTags[0];
+                let w = $(window).width();
+                let h = $(window).width();
+                canvas.setAttribute('width', w);
+                canvas.setAttribute('height', h);
+                var nCanvas2d = canvas.getContext('2d');
+                nCanvas2d.drawImage(img, 0, 0, w - 10, h - 10);
+                $('.home-canvas-container').html('').append(canvas);
+                doorInit();
+            }
+            img.src = selectedHome.src;
+        })();
+
+        function saveHome() {
+            $('.home-canvas-container').html('');
+            $('.door-controls').html('');
+
+
+        }
+    </script>
+</body>
+
+</html>

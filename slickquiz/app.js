@@ -9,7 +9,6 @@
  * @copyright (c) 2013 Quicken Loans - http://www.quickenloans.com
  * @license MIT
  */
-
 (function ($) {
     $.slickQuiz = function (element, options) {
         var plugin = this,
@@ -216,123 +215,204 @@
                     $quizResultsCopy.append('<p><a class="button ' + tryAgainClass + '" href="#">' + plugin.config.tryAgainText + '</a></p>');
                 }
 
-                // Setup questions
-                var quiz = $('<ol class="' + questionGroupClass + '"></ol>'),
-                    count = 1;
+                if (!plugin.config.groupBy) {
+                    // Setup questions
+                    var quiz = $('<ol class="' + questionGroupClass + '"></ol>'),
+                        count = 1;
 
-                // Loop through questions object
-                for (i in questions) {
-                    if (questions.hasOwnProperty(i)) {
-                        var question = questions[i];
+                    // Loop through questions object
+                    for (i in questions) {
+                        if (questions.hasOwnProperty(i)) {
+                            var question = questions[i];
 
-                        var questionHTML = $('<li class="' + questionClass + '" id="question' + (count - 1) + '"></li>');
+                            var questionHTML = $('<li class="' + questionClass + ' pageid-' + question.pageId + '" id="question' + (count - 1) + '"></li>');
 
-                        if (plugin.config.displayQuestionCount) {
-                            questionHTML.append('<div class="' + questionCountClass + '">' +
-                                plugin.config.questionCountText
-                                    .replace('%current', '<span class="current">' + count + '</span>')
-                                    .replace('%total', '<span class="total">' +
-                                    questionCount + '</span>') + '</div>');
-                        }
+                            if (plugin.config.displayQuestionCount) {
+                                questionHTML.append('<div class="' + questionCountClass + '">' +
+                                    plugin.config.questionCountText
+                                        .replace('%current', '<span class="current">' + count + '</span>')
+                                        .replace('%total', '<span class="total">' +
+                                        questionCount + '</span>') + '</div>');
+                            }
 
-                        var formatQuestion = '';
-                        if (plugin.config.displayQuestionNumber) {
-                            formatQuestion = plugin.config.questionTemplateText
-                                .replace('%count', count).replace('%text', question.q);
-                        } else {
-                            formatQuestion = question.q;
-                        }
-                        questionHTML.append('<h3>' + formatQuestion + '</h3>');
+                            var formatQuestion = '';
+                            if (plugin.config.displayQuestionNumber) {
+                                formatQuestion = plugin.config.questionTemplateText
+                                    .replace('%count', count).replace('%text', question.q);
+                            } else {
+                                formatQuestion = question.q;
+                            }
+                            questionHTML.append('<h3>' + formatQuestion + '</h3>');
 
-                        // Count the number of true values
-                        var truths = 0;
-                        for (i in question.a) {
-                            if (question.a.hasOwnProperty(i)) {
-                                answer = question.a[i];
-                                if (answer.correct) {
-                                    truths++;
+                            // Count the number of true values
+                            var truths = 0;
+                            for (i in question.a) {
+                                if (question.a.hasOwnProperty(i)) {
+                                    answer = question.a[i];
+                                    if (answer.correct) {
+                                        truths++;
+                                    }
                                 }
                             }
-                        }
 
-                        // Now let's append the answers with checkboxes or radios depending on truth count
-                        var answerHTML = $('<ul class="' + answersClass + '"></ul>');
+                            // Now let's append the answers with checkboxes or radios depending on truth count
+                            var answerHTML = $('<ul class="' + answersClass + '"></ul>');
 
-                        // Get the answers
-                        var answers = plugin.config.randomSortAnswers ?
-                            question.a.sort(function () { return (Math.round(Math.random()) - 0.5); }) :
-                            question.a;
+                            // Get the answers
+                            var answers = plugin.config.randomSortAnswers ?
+                                question.a.sort(function () { return (Math.round(Math.random()) - 0.5); }) :
+                                question.a;
 
-                        // prepare a name for the answer inputs based on the question
-                        var selectAny = question.select_any ? question.select_any : false,
-                            forceCheckbox = question.force_checkbox ? question.force_checkbox : false,
-                            checkbox = (truths > 1 && !selectAny) || forceCheckbox,
-                            inputName = $element.attr('id') + '_question' + (count - 1),
-                            inputType = checkbox ? 'checkbox' : 'radio';
+                            // prepare a name for the answer inputs based on the question
+                            var selectAny = question.select_any ? question.select_any : false,
+                                forceCheckbox = question.force_checkbox ? question.force_checkbox : false,
+                                checkbox = (truths > 1 && !selectAny) || forceCheckbox,
+                                inputName = $element.attr('id') + '_question' + (count - 1),
+                                inputType = checkbox ? 'checkbox' : 'radio';
 
-                        if (count == quizValues.questions.length) {
-                            nextQuestionClass = nextQuestionClass + ' ' + lastQuestionClass;
-                        }
-
-                        for (i in answers) {
-                            if (answers.hasOwnProperty(i)) {
-                                answer = answers[i],
-                                    optionId = inputName + '_' + i.toString();
-
-                                // If question has >1 true answers and is not a select any, use checkboxes; otherwise, radios
-                                var input = '<input id="' + optionId + '" name="' + inputName +
-                                    '" type="' + inputType + '" /> ';
-
-                                var optionLabel = '<label for="' + optionId + '">' + answer.option + '</label>';
-
-                                var answerContent = $('<li></li>')
-                                    .append(input)
-                                    .append(optionLabel);
-                                answerHTML.append(answerContent);
+                            if (count == quizValues.questions.length) {
+                                nextQuestionClass = nextQuestionClass + ' ' + lastQuestionClass;
                             }
+
+                            for (i in answers) {
+                                if (answers.hasOwnProperty(i)) {
+                                    answer = answers[i],
+                                        optionId = inputName + '_' + i.toString();
+
+                                    // If question has >1 true answers and is not a select any, use checkboxes; otherwise, radios
+                                    var input = '<input id="' + optionId + '" name="' + inputName +
+                                        '" type="' + inputType + '" /> ';
+
+                                    var optionLabel = '<label for="' + optionId + '">' + answer.option + '</label>';
+
+                                    var answerContent = $('<li></li>')
+                                        .append(input)
+                                        .append(optionLabel);
+                                    answerHTML.append(answerContent);
+                                }
+                            }
+
+                            // Append answers to question
+                            questionHTML.append(answerHTML);
+
+                            // If response messaging is NOT disabled, add it
+                            if (plugin.config.perQuestionResponseMessaging || plugin.config.completionResponseMessaging) {
+                                // Now let's append the correct / incorrect response messages
+                                var responseHTML = $('<ul class="' + responsesClass + '"></ul>');
+                                responseHTML.append('<li class="' + correctResponseClass + '">' + question.correct + '</li>');
+                                responseHTML.append('<li class="' + incorrectResponseClass + '">' + question.incorrect + '</li>');
+
+                                // Append responses to question
+                                questionHTML.append(responseHTML);
+                            }
+
+                            // Appends check answer / back / next question buttons
+                            if (plugin.config.backButtonText && plugin.config.backButtonText !== '') {
+                                questionHTML.append('<a href="#" class="button ' + backToQuestionClass + '">' + plugin.config.backButtonText + '</a>');
+                            }
+
+                            var nextText = plugin.config.nextQuestionText;
+                            if (plugin.config.completeQuizText && count == questionCount) {
+                                nextText = plugin.config.completeQuizText;
+                            }
+
+                            // If we're not showing responses per question, show next question button and make it check the answer too
+                            if (!plugin.config.perQuestionResponseMessaging) {
+                                questionHTML.append('<a href="#" class="button ' + nextQuestionClass + ' ' + checkAnswerClass + '">' + nextText + '</a>');
+                            } else {
+                                questionHTML.append('<a href="#" class="button ' + nextQuestionClass + '">' + nextText + '</a>');
+                                questionHTML.append('<a href="#" class="button ' + checkAnswerClass + '">' + plugin.config.checkAnswerText + '</a>');
+                            }
+
+                            // Append question & answers to quiz
+                            quiz.append(questionHTML);
+
+                            count++;
                         }
-
-                        // Append answers to question
-                        questionHTML.append(answerHTML);
-
-                        // If response messaging is NOT disabled, add it
-                        if (plugin.config.perQuestionResponseMessaging || plugin.config.completionResponseMessaging) {
-                            // Now let's append the correct / incorrect response messages
-                            var responseHTML = $('<ul class="' + responsesClass + '"></ul>');
-                            responseHTML.append('<li class="' + correctResponseClass + '">' + question.correct + '</li>');
-                            responseHTML.append('<li class="' + incorrectResponseClass + '">' + question.incorrect + '</li>');
-
-                            // Append responses to question
-                            questionHTML.append(responseHTML);
-                        }
-
-                        // Appends check answer / back / next question buttons
-                        if (plugin.config.backButtonText && plugin.config.backButtonText !== '') {
-                            questionHTML.append('<a href="#" class="button ' + backToQuestionClass + '">' + plugin.config.backButtonText + '</a>');
-                        }
-
-                        var nextText = plugin.config.nextQuestionText;
-                        if (plugin.config.completeQuizText && count == questionCount) {
-                            nextText = plugin.config.completeQuizText;
-                        }
-
-                        // If we're not showing responses per question, show next question button and make it check the answer too
-                        if (!plugin.config.perQuestionResponseMessaging) {
-                            questionHTML.append('<a href="#" class="button ' + nextQuestionClass + ' ' + checkAnswerClass + '">' + nextText + '</a>');
-                        } else {
-                            questionHTML.append('<a href="#" class="button ' + nextQuestionClass + '">' + nextText + '</a>');
-                            questionHTML.append('<a href="#" class="button ' + checkAnswerClass + '">' + plugin.config.checkAnswerText + '</a>');
-                        }
-
-                        // Append question & answers to quiz
-                        quiz.append(questionHTML);
-
-                        count++;
                     }
+                    // Add the quiz content to the page
+                    $quizArea.append(quiz);
+                } else {
+                    var quizPagesHtml = $(`<ol class="quiz"></ol>`);
+                    var quizPages = questions.reduce((a, b) => { if (a[b['pageId']]) { a[b['pageId']].push(b); } else { a[b['pageId']] = [b]; } return a; }, {});
+                    var count = 1;
+                    for (var page in quizPages) {
+                        var questionsPerPage = quizPages[page];
+                        var questionsHtml = $(` <ol class="${questionGroupClass}"> </ol>`);
+                        for (qIndex in questionsPerPage) {
+                            var question = questionsPerPage[qIndex];
+                            var qNo = parseInt(qIndex) + 1;
+                            var questionHtml = $(`
+                                 <li class="${questionClass}" id="question${count}">
+                                 </li>
+                            `);
+                            questionHtml.append(`<h3>${qNo}.${question.q}</h3>`);
+                            // Count the number of true values
+                            var truths = 0;
+                            for (i in question.a) {
+                                if (question.a.hasOwnProperty(i)) {
+                                    answer = question.a[i];
+                                    if (answer.correct) {
+                                        truths++;
+                                    }
+                                }
+                            }
+
+                            // Now let's append the answers with checkboxes or radios depending on truth count
+                            var answerHTML = $('<ul class="' + answersClass + '"></ul>');
+
+                            // Get the answers
+                            var answers = plugin.config.randomSortAnswers ?
+                                question.a.sort(function () { return (Math.round(Math.random()) - 0.5); }) :
+                                question.a;
+
+                            // prepare a name for the answer inputs based on the question
+                            var selectAny = question.select_any ? question.select_any : false,
+                                forceCheckbox = question.force_checkbox ? question.force_checkbox : false,
+                                checkbox = (truths > 1 && !selectAny) || forceCheckbox,
+                                inputName = $element.attr('id') + '_question' + (count - 1),
+                                inputType = checkbox ? 'checkbox' : 'radio';
+
+                            if (count == quizValues.questions.length) {
+                                nextQuestionClass = nextQuestionClass + ' ' + lastQuestionClass;
+                            }
+
+                            for (i in answers) {
+                                if (answers.hasOwnProperty(i)) {
+                                    answer = answers[i],
+                                        optionId = inputName + '_' + i.toString();
+
+                                    // If question has >1 true answers and is not a select any, use checkboxes; otherwise, radios
+                                    var input = '<input ans-value="' + answer.option + '" id="' + optionId + '" name="' + inputName +
+                                        '" type="' + inputType + '" /> ';
+
+                                    var optionLabel = '<label for="' + optionId + '">' + answer.option + '</label>';
+
+                                    var answerContent = $('<li></li>')
+                                        .append(input)
+                                        .append(optionLabel);
+                                    answerHTML.append(answerContent);
+                                }
+                            }
+
+                            // Append answers to question
+                            questionHtml.append(answerHTML);
+                            questionHtml.data('question', question);
+                            questionsHtml.append(questionHtml);
+                            count = count + 1;
+                        }
+                        var pageStr = $(`<li class="quiz-page page-${page}"></li>`);
+                        pageStr.append(questionsHtml);
+                        var nextText = plugin.config.nextQuestionText
+                        pageStr.append('<a href="#" class="button ' + nextQuestionClass + '">' + nextText + '</a>');
+                        // pageStr.append('<a href="#" class="button ' + checkAnswerClass + '">' + plugin.config.checkAnswerText + '</a>');
+                        pageStr.hide();
+                        quizPagesHtml.append(pageStr);
+                    }
+                    $quizArea.append(quizPagesHtml);
                 }
 
-                // Add the quiz content to the page
-                $quizArea.append(quiz);
+
 
                 // Toggle the start button OR start the quiz if start button is disabled
                 if (plugin.config.skipStartButton || $quizStarter.length == 0) {
@@ -354,7 +434,12 @@
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
                 function start(options) {
-                    var firstQuestion = $(_element + ' ' + _questions + ' li').first();
+                    // var firstQuestion = $(_element + ' ' + _questions + ' li').first();
+                    if (plugin.config.groupBy) {
+                        plugin.config.pageIndex = 1;
+                        $('.quiz-page').hide();
+                        firstQuestion = $('.quiz .page-1').first();
+                    }
                     if (firstQuestion.length) {
                         firstQuestion.fadeIn(500, function () {
                             if (options && options.callback) options.callback();
@@ -508,6 +593,16 @@
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
+                if (plugin.config.groupBy) {
+                    plugin.config.pageIndex = plugin.config.pageIndex ? plugin.config.pageIndex + 1 : 1;
+                    $(`.quiz-page`).hide();
+                    if ($(`.quiz-page.page-${plugin.config.pageIndex}`).length > 0) {
+                        $(`.quiz-page.page-${plugin.config.pageIndex}`).show();
+                    } else {
+                        plugin.method.completeQuiz({ callback: plugin.config.animationCallbacks.completeQuiz });
+                    }
+                    return;
+                }
                 var currentQuestion = $($(nextButton).parents(_question)[0]),
                     nextQuestion = currentQuestion.next(_question),
                     answerInputs = currentQuestion.find('input:checked');
@@ -595,8 +690,42 @@
                 keyNotch = internal.method.getKeyNotch; // a function that returns a jQ animation callback function
                 kN = keyNotch; // you specify the notch, you get a callback function for your animation
 
-                var score = $(_element + ' ' + _correct).length,
-                    displayScore = score;
+
+                var score = $(_element + ' ' + _correct).length;
+                if (plugin.config.groupBy) {
+                    var crctAnswCount = 0;
+                    $('.question').each((i, qn) => {
+                        var selectedAnswers = $(qn).find('.answers').first().find('input:checked');
+                        var questionData = $(qn).data('question');
+                        var trueAnswers = questionData.a.reduce((a, b) => {
+                            if (b.correct == true) {
+                                return a.concat(b.option);
+                            }
+                            return a;
+                        }, []);
+                        var selectAny = questionData.select_any ? true : false;
+                        if (selectedAnswers.length) {
+                            var selectedValues = selectedAnswers.toArray().reduce((a, b) => {
+                                return a.concat($(b).attr('ans-value'));
+                            }, []);
+                            var y = 0;
+                            for (var t = 0; t < trueAnswers.length; t++) {
+                                for (s = 0; s < selectedValues.length; s++) {
+                                    if (trueAnswers[t] == selectedValues[s]) {
+                                        y = y + 1;
+                                    }
+                                }
+                            }
+                            if (y == trueAnswers.length) {
+                                crctAnswCount = crctAnswCount + 1;
+                            } else if (y > 0 && selectAny) {
+                                crctAnswCount = crctAnswCount + 1;
+                            }
+                        }
+                    });
+                    score = crctAnswCount;
+                }
+                var displayScore = score;
                 if (plugin.config.scoreAsPercentage) {
                     displayScore = (score / questionCount).toFixed(2) * 100 + "%";
                 }
@@ -824,7 +953,10 @@ var quizJSON = {
     ]
 };
 $(function () {
-    $('#slickQuiz').slickQuiz({
+    var qConfig = {
         json: quizJSON
-    });
+    };
+    qConfig.groupBy = 'pageId';
+    qConfig.pageIndex = 1;
+    $('#slickQuiz').slickQuiz(qConfig);
 });

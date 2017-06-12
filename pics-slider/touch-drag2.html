@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            border: 1px solid red;
+            overflow: hidden;
+        }
+        
+        .container.dragStart {
+            position: fixed;
+        }
+        
+        .box {
+            width: 70px;
+            height: 70px;
+            background-color: green;
+            float: left;
+            border: 1px solid black;
+        }
+        
+        .w80 {
+            width: 80px;
+        }
+        
+        .h80 {
+            height: 80px;
+        }
+        
+        .w100 {
+            width: 100px;
+        }
+        
+        .h100 {
+            height: 100px;
+        }
+        
+        .w150 {
+            width: 150px;
+        }
+        
+        .h150 {
+            height: 150px;
+        }
+        
+        .w100per {
+            width: 100%;
+        }
+        
+        .h100per {
+            height: 100%;
+        }
+        
+        .cursor {
+            border: 2px dashed black;
+        }
+        
+        .cursor-left {
+            border-left: 2px dashed black;
+        }
+        
+        .cursor-right {
+            border-right: 2px dashed black;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+    </div>
+
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var dragElem = null;
+        var touchX, touchY, oldScroll = 0;
+        var boxes = [];
+
+        var BoxClass = function (obj) {
+            this.classes = obj['classes'];
+            this.html = obj['html'];
+        };
+
+        boxes.push({ classes: '', html: '1' });
+
+        var renderBoxes = function () {
+            var $container = $('.container');
+            $container.html('');
+            boxes.forEach((b, i) => {
+                var $div = $('<div/>');
+                $div.attr('box-id', i);
+                $div.addClass('box');
+                $div.addClass(b.classes);
+                if (b.fixme) {
+                    $div.addClass('fixme');
+                }
+                $div.html(b.html);
+                b.elem = $div;
+                $container.append($div);
+            });
+            bindEvents();
+        };
+
+        var findElementbyCords = function (x, y, setClass) {
+            var elemPos;
+            boxes.forEach(b => {
+                var elem = b.elem;
+                if (elem) {
+                    elem.removeClass('cursor').removeClass('cursor-left').removeClass('cursor-right');
+                    var left = elem.offset().left;
+                    var top = elem.offset().top;
+                    var width = elem.outerWidth();
+                    var height = elem.outerHeight();
+
+                    if (x >= left && x < left + width) {
+                        if (y >= top && y < top + height) {
+                            elemPos = elem;
+                            if (setClass) {
+                                if (width / 2 > x - left) {
+                                    elemPos.addClass('cursor-left');
+                                } else {
+                                    elemPos.addClass('cursor-right');
+                                }
+                            }
+                        }
+                    }
+                }
+
+            });
+
+            return elemPos;
+        };
+
+        var swapBoxes = function (s, d) {
+            // var tmpbox = new BoxClass(boxes[d]);
+            // boxes[d] = boxes[s];
+            // boxes[s] = tmpbox;
+            renderBoxes();
+        };
+        var moveBox = function (s, d, isAfter, elem) {
+            if (s != d) {
+                var tmpbox = new BoxClass(boxes[s]);
+                if (isAfter) {
+                    boxes.splice(d + 1, 0, tmpbox);
+                } else {
+                    boxes.splice(d, 0, tmpbox);
+                }
+                if (s < d) {
+                    boxes.splice(s, 1);
+                } else {
+                    boxes.splice(s + 1, 1);
+                }
+                renderBoxes();
+            } else {
+                $(elem).removeClass('cursor').removeClass('cursor-left').removeClass('cursor-right');
+            }
+        };
+        var bindEvents = function () {
+            $('.box').on('touchstart', function (e) {
+                if (e.touches.length > 0) {
+                    touchX = e.touches[0].clientX;
+                    touchY = e.touches[0].clientY;
+                }
+                //$('.container').removeClass('dragStart');
+                //$('.container').css({ top: '0' })
+                if (!$(e.target).hasClass('fixme')) {
+                    dragElem = e.target;
+                    var top = $(window).scrollTop();
+                    oldScroll = top;
+                    $('.container').addClass('dragStart');
+                    $('.container').css({ top: -top });
+                } else {
+                    dragElem = null;
+                }
+            });
+
+            $('.box').on('touchend', function (e) {
+                var elem = findElementbyCords(touchX, touchY, true);
+                if (elem && dragElem) {
+                    var s = parseInt($(dragElem).attr('box-id'));
+                    var d = parseInt($(elem).attr('box-id'));
+                    if (elem.hasClass('cursor-left')) {
+                        moveBox(s, d, false, elem);
+                    } else {
+                        moveBox(s, d, true, elem);
+                    }
+                    $('.container').removeClass('dragStart');
+                    $('.container').css({ top: 0 });
+                    $('.box').removeClass('cursor').removeClass('cursor-left').removeClass('cursor-right');
+                    $(window).scrollTop(oldScroll);
+                } else {
+                    $('.container').removeClass('dragStart');
+                }
+            });
+        };
+        $(document).ready(function () {
+            renderBoxes();
+        });
+
+        var moveContainer = function () {
+
+        };
+
+        $(document).on('touchmove', function (e) {
+            if (e.touches.length > 0 && dragElem) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+                var elem = findElementbyCords(touchX, touchY, true);
+                if (elem) {
+                    //elem.addClass('cursor');
+                    //$('.container').addClass('dragStart');
+                }
+                var lowerDiff = $(window).height() - touchY;
+                if (lowerDiff < 20) {
+                    oldScroll = oldScroll + 10;
+                    $('.container').css({ top: -oldScroll });
+                } else if (touchY < 40) {
+                    if (oldScroll - 10 >= 0) {
+                        oldScroll = oldScroll - 10;
+                        $('.container').css({ top: -oldScroll });
+                    }
+                }
+            } else {
+                $('.container').removeClass('dragStart');
+            }
+
+
+        });
+    </script>
+</body>
+
+</html>

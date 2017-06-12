@@ -237,3 +237,25 @@ ul.responses li.incorrect p span {
     clear: both;
     margin-top: 20px;
 }
+
+.hidden {
+    display: none;
+}
+
+.quiz,
+.quiz li {
+    list-style: none;
+    padding: 0px;
+}
+
+.questions {
+    padding-left: 0;
+}
+
+.questions li.question {
+    display: block;
+}
+
+.quiz-page .nextQuestion {
+    display: inline;
+}

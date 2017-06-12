@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            border: 1px solid red;
+            position: relative;
+        }
+        
+        .container.dragStart {
+            position: fixed;
+        }
+        
+        .dd-row {
+            position: relative;
+            clear: both;
+        }
+        
+        .box {
+            position: relative;
+            display: inline-block;
+            /*float: left;*/
+        }
+        
+        .box.is-dummy {
+            border: 3px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+    </div>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var config = {
+            isRowSplit: true
+        };
+
+
+        var boxes = [];
+        var widgetcount = 0;
+        var containerWidth, boxWidth, boxHeight, touchX, touchY;
+        var touchDragTime = null, oldScroll, dragMoving;
+        var boxMatrix = {};
+
+        var Widget = function (obj) {
+            this.id = boxes.length;
+            this.r = obj['r'];
+            this.c = obj['c'];
+            this.w = obj['w'];
+            this.h = obj['h'];
+            this.bColor = ('#' + Math.round(Math.random() * 1000));
+            this.brColor = ('#' + Math.round(Math.random() * 1000));
+            widgetcount = widgetcount + 1;
+
+            this.html = obj['isDummy'] ? '' : 'w-' + widgetcount;
+            this.isDummy = obj['isDummy'] ? true : false;
+        };
+
+        boxes.push(new Widget({ r: 0, c: 0, w: 1, h: 1 }));
+        boxes.push(new Widget({ r: 0, c: 1, w: 1, h: 1 }));
+        boxes.push(new Widget({ r: 0, c: 2, w: 1, h: 1 }));
+
+        boxes.push(new Widget({ r: 1, c: 2, w: 1, h: 1 }));
+        boxes.push(new Widget({ r: 1, c: 2, w: 1, h: 2 }));
+        boxes.push(new Widget({ r: 1, c: 2, w: 1, h: 1 }));
+
+        // boxes.push(new Widget({ r: 0, c: 2, w: 2, h: 1 }));
+        // boxes.push(new Widget({ r: 0, c: 2, w: 1, h: 1 }));
+
+        // boxes.push(new Widget({ r: 1, c: 0, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 1, c: 1, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 1, c: 2, w: 1, h: 2 }));
+
+        // boxes.push(new Widget({ r: 2, c: 0, w: 1, h: 2 }));
+        // boxes.push(new Widget({ r: 2, c: 1, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 2, c: 2, w: 1, h: 2 }));
+
+        // boxes.push(new Widget({ r: 2, c: 1, w: 1, h: 3 }));
+
+        // boxes.push(new Widget({ r: 2, c: 1, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 2, c: 1, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 2, c: 1, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 2, c: 1, w: 1, h: 1 }));
+
+
+
+        // boxes.push(new Widget({ r: 3, c: 0, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 3, c: 0, w: 1, h: 1 }));
+        // boxes.push(new Widget({ r: 3, c: 0, w: 1, h: 1 }));
+
+        var fillMatrix = function (r, c, box) {
+            if (!boxMatrix[r]) {
+                boxMatrix[r] = {};
+            }
+
+            if (!boxMatrix[r][c]) {
+                boxMatrix[r][c] = {};
+            }
+            if (!boxMatrix[r][c].widget) {
+                boxMatrix[r][c].widget = box;
+            }
+        };
+
+        var fillWithEmptyBoxes = function (th) {
+            // console.log('th ', th);
+            // for (var r = 0; r <= th; r++) {
+            //     var row = {};
+            //     if (!boxMatrix[r]) {
+            //         boxMatrix[r] = {};
+            //     }
+            //     row = boxMatrix[r];
+            //     for (var c = 0; c < 3; c++) {
+            //         if (!row[c]) {
+            //             boxes.push(new Widget({ r: r, c: c, w: 1, h: 1, isDummy: true }));
+            //         }
+            //     }
+            // }
+
+
+        };
+
+        var generateMatrix = function () {
+            var th = 0;
+            for (var b = 0, blen = boxes.length; b < blen; b++) {
+                var box = boxes[b];
+                fillMatrix(box.r, box.c, box);
+                if (config.isRowSplit) {
+
+                } else {
+                    th = box.r > th ? box.r : th;
+
+                    if (box.h > 1) {
+                        for (var t = 1; t < box.h; t++) {
+                            fillMatrix(box.r + t, box.c, box);
+                        }
+                        th = box.r + box.h > th ? box.r + box.h : th;
+                    }
+                    if (box.w > 1) {
+                        for (var t = 1; t < box.w; t++) {
+                            fillMatrix(box.r, box.c + t, box);
+                        }
+                    }
+                }
+            };
+
+            fillWithEmptyBoxes(th);
+        };
+
+        var bymatrix = {};
+        var renderContainer = function () {
+            //generateMatrix();
+
+            var $container = $('.container');
+            $container.html('');
+            for (var b = 0, blen = boxes.length; b < blen; b++) {
+                var box = boxes[b];
+
+                var $box = $('<div/>').addClass('box');
+                $box.css({
+                    // top: (box.r * boxHeight),
+                    // left: (box.c * boxWidth),
+                    width: (box.w * boxWidth),
+                    height: (box.h * boxHeight),
+                    backgroundColor: box.bColor
+                });
+                $box.html(box.html);
+
+                if (box.isDummy) {
+                    $box.addClass('is-dummy');
+                }
+
+                $box.attr('box-id', box.id);
+                box.elem = $box;
+                if (config.isRowSplit) {
+                    var $ddrow = $('.dd-row.row-' + box.r);
+                    if ($ddrow.length == 0) {
+                        $ddrow = $('<div/>').addClass('dd-row').addClass('row-' + box.r);
+                        $container.append($ddrow);
+                    }
+                    $ddrow.append($box);
+                } else {
+                    $container.append($box);
+                }
+            }
+        };
+
+        var getWidgetByCords = function (x, y) {
+            var wid = null;
+            // for (var r = 0, rlen = Object.keys(boxMatrix).length; r < rlen; r++) {
+            //     var widget = boxMatrix[r][0] ? boxMatrix[r][0].widget : null;
+            //     if (widget && widget.elem) {
+            //         var elem = widget.elem;
+            //         var wTop = elem.offset().top;
+            //         var wHeight = elem.height();
+
+            //         var wLeft = elem.offset().left;
+            //         var wWidth = elem.width();
+
+            //         if (y >= wTop && y < wHeight) {
+            //             if (x >= wLeft && x < wWidth) {
+            //                 wid = widget;
+            //                 break;
+            //             }
+            //         }
+
+            //     }
+            // }
+
+
+            for (var i = 0, blen = boxes.length; i < blen; i++) {
+                var widget = boxes[i];
+                if (widget && widget.elem) {
+                    var elem = widget.elem;
+                    var wTop = elem.offset().top;
+                    var wHeight = elem.height();
+
+                    var wLeft = elem.offset().left;
+                    var wWidth = elem.width();
+                    if (y >= wTop && y < (wTop + wHeight)) {
+                        if (x >= wLeft && x < (wLeft + wWidth)) {
+                            wid = widget;
+                            break;
+                        }
+                    }
+                }
+
+            }
+            return wid;
+        };
+
+
+        var dragElem = null;
+        var bindEvents = function () {
+            $('.box').on('touchstart', function (e) {
+                touchDragTime = new Date();
+                dragElem = e.target;
+            });
+            $('.box').on('touchend', function (e) {
+                var tdiff = new Date() - touchDragTime;
+                var ss = (tdiff / 1000);
+                touchDragTime = null;
+                $('.container').removeClass('dragStart');
+                $('.container').css({ top: 0 });
+                $(window).scrollTop(oldScroll);
+                dragMoving = false;
+                if (dragElem) {
+                    var destWidget = getWidgetByCords(touchX, touchY);
+                    var srcWidget = boxes.filter(b => { return b.id == parseInt($(dragElem).attr('box-id')); });
+                    srcWidget = srcWidget.length > 0 ? srcWidget[0] : null;
+                    if (srcWidget) {
+                        console.log('elemToReplace ', destWidget, ' source to remove ', srcWidget);
+                    }
+                    dragElem = null;
+                }
+            });
+        };
+
+
+        $(document).ready(function () {
+            containerWidth = $('.container').width();
+            boxWidth = containerWidth / 3;
+            boxHeight = boxWidth;
+
+            renderContainer();
+            bindEvents();
+
+            $(window).on('touchmove', function (e) {
+                var tdiff = 0;
+                if (touchDragTime && !dragMoving) {
+                    tdiff = new Date() - touchDragTime;
+                    if (tdiff > 100) {
+                        dragMoving = true;
+                        oldScroll = $(window).scrollTop();
+                        $('.container').addClass('dragStart');
+                        $('.container').css({ top: -oldScroll });
+                    }
+                }
+                if (e.touches.length > 0) {
+                    touchX = e.touches[0].clientX;
+                    touchY = e.touches[0].clientY;
+                    if (dragMoving) {
+                        var lowerDiff = $(window).height() - touchY;
+                        if (lowerDiff < 20) {
+                            oldScroll = oldScroll + 10;
+                            $('.container').css({ top: -oldScroll });
+                        } else if (touchY < 40) {
+                            if (oldScroll - 10 >= 0) {
+                                oldScroll = oldScroll - 10;
+                                $('.container').css({ top: -oldScroll });
+                            }
+                        }
+                        getWidgetByCords(touchX, touchY);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

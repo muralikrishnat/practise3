@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            border: 1px solid red;
+            position: relative;
+            width: 100%;
+        }
+        
+        .container.dragStart {
+            position: fixed;
+        }
+        
+        .dd-row {
+            position: relative;
+            clear: both;
+        }
+        
+        .box4 {
+            position: relative;
+            display: inline-block;
+            /*float: left;*/
+        }
+        
+        .box {
+            position: absolute;
+        }
+        
+        .box.is-dummy {
+            border: 3px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+    </div>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var config = {
+            isRowSplit: true,
+            boxTry: 2
+        };
+
+
+        var boxes = [];
+        var widgetcount = 0;
+        var containerWidth, boxWidth, boxHeight, touchX, touchY;
+        var touchDragTime = null, oldScroll, dragMoving;
+        var boxMatrix = {};
+
+        var Widget = function (obj, makeCopy) {
+
+            this.r = obj['r'];
+            this.c = obj['c'];
+            this.w = obj['w'];
+            this.h = obj['h'];
+            this.bColor = ('#' + Math.round(Math.random() * 1000));
+            this.brColor = ('#' + Math.round(Math.random() * 1000));
+
+            this.isDummy = obj['isDummy'] ? true : false;
+
+            this.t = obj['t'];
+            this.l = obj['l'];
+
+            if (!makeCopy) {
+                widgetcount = widgetcount + 1;
+                this.html = obj['isDummy'] ? '' : 'w-' + widgetcount;
+                this.id = widgetcount;
+            } else {
+                this.bColor = obj['bColor'];
+                this.brColor = obj['brColor'];
+                this.html = obj['html'];
+                this.id = obj['id'];
+            }
+        };
+
+
+
+
+        var rows = [];
+
+        var row1 = [];
+        row1.push(new Widget({ r: 0, c: 0, w: 1, h: 1, l: 0, t: 0 }));
+        row1.push(new Widget({ r: 0, c: 0, w: 1, h: 1, l: 1, t: 0 }));
+        row1.push(new Widget({ r: 0, c: 0, w: 1, h: 1, l: 2, t: 0 }));
+        rows.push(row1);
+
+        var row2 = [];
+        row2.push(new Widget({ r: 1, c: 0, w: 1, h: 2, l: 0, t: 0 }));
+        row2.push(new Widget({ r: 1, c: 1, w: 1, h: 2, l: 1, t: 1 }));
+        row2.push(new Widget({ r: 1, c: 2, w: 1, h: 1, l: 2, t: 0 }));
+        rows.push(row2);
+
+        var fillMatrix = function (r, c, box) {
+            if (!boxMatrix[r]) {
+                boxMatrix[r] = {};
+            }
+
+            if (!boxMatrix[r][c]) {
+                boxMatrix[r][c] = {};
+            }
+            if (!boxMatrix[r][c].widget) {
+                boxMatrix[r][c].widget = box;
+            }
+        };
+
+        var fillWithEmptyBoxes = function (th) {
+            // console.log('th ', th);
+            // for (var r = 0; r <= th; r++) {
+            //     var row = {};
+            //     if (!boxMatrix[r]) {
+            //         boxMatrix[r] = {};
+            //     }
+            //     row = boxMatrix[r];
+            //     for (var c = 0; c < 3; c++) {
+            //         if (!row[c]) {
+            //             boxes.push(new Widget({ r: r, c: c, w: 1, h: 1, isDummy: true }));
+            //         }
+            //     }
+            // }
+
+
+        };
+
+        var getBoxes = function (l, t, w, h, box, mtx) {
+            for (var i = 0; i < w; i++) {
+                for (var j = 0; j < h; j++) {
+                    var c = box.c;
+                    var r = box.t + j;
+                    if (!mtx[c]) {
+                        mtx[c] = [];
+                    }
+                    mtx[c][r] = box;
+                }
+            }
+            return mtx;
+        };
+        var rowHeights = [];
+        var generateMatrix = function () {
+            rowHeights = [];
+            for (var r = 0, rlen = rows.length; r < rlen; r++) {
+                var widgets = rows[r];
+                var rowMatrix = [];
+
+                for (var w = 0, wlen = widgets.length; w < wlen; w++) {
+                    var box = widgets[w];
+                    rowMatrix = getBoxes(box.l, box.t, box.w, box.h, box, rowMatrix);
+                }
+
+                var rH = 0;
+                for (var i = 0, len = rowMatrix.length; i < len; i++) {
+                    if (rowMatrix[i] && rowMatrix[i].length > rH) {
+                        rH = rowMatrix[i].length;
+                    }
+                }
+                rowHeights[r] = rH * boxHeight;
+            }
+        };
+
+        var renderContainer = function () {
+            generateMatrix();
+            var $container = $('.container');
+            $container.html('');
+            for (var r = 0, rlen = rows.length; r < rlen; r++) {
+                var rowTH = 0;
+
+                var widgets = rows[r];
+                var $addrow = $('.dd-row.row-' + r);
+                if ($addrow.length === 0) {
+                    $addrow = $('<div/>').addClass('dd-row').addClass('row-' + r);
+                }
+                $addrow.css({
+                    height: rowHeights[r] + 'px'
+                })
+                for (var w = 0, wlen = widgets.length; w < wlen; w++) {
+                    var box = widgets[w];
+                    var $box = $('<div/>').addClass('box');
+                    $box.css({
+                        top: (box.t * boxHeight),
+                        left: (box.l * boxWidth),
+                        width: (box.w * boxWidth),
+                        height: (box.h * boxHeight),
+                        backgroundColor: box.bColor
+                    });
+
+                    $box.html(box.html);
+
+                    $box.attr('box-id', box.id);
+                    box.elem = $box;
+
+                    $addrow.append($box);
+
+                }
+                $container.append($addrow);
+            }
+            bindEvents();
+        };
+
+        var getWidgetByCords = function (x, y, byId) {
+            var wid = null;
+            if (byId != null) {
+                for (var r = 0, rlen = rows.length; r < rlen; r++) {
+                    for (var w = 0, clen = rows[r].length; w < clen; w++) {
+                        var box = rows[r][w];
+                        if (box.id == byId) {
+                            wid = box;
+                        }
+                    }
+                }
+            } else {
+                for (var r = 0, rlen = rows.length; r < rlen; r++) {
+                    var $ddRow = $('.dd-row.row-' + r);
+                    if ($ddRow.length > 0) {
+                        if (y >= $ddRow.offset().top && y < ($ddRow.offset().top + $ddRow.height())) {
+                            for (var w = 0, clen = rows[r].length; w < clen; w++) {
+                                var box = rows[r][w];
+                                if (box.elem) {
+                                    var elem = box.elem;
+                                    if (x >= elem.offset().left && x < (elem.offset().left + elem.width())) {
+                                        if (y >= elem.offset().top && y < elem.offset().top + elem.height()) {
+                                            wid = box;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return wid;
+        };
+
+        var swapWidgets = function (sWidget, dWidget) {
+            var tmpDWidget = new Widget(dWidget, true);
+            var tmpSWidget = new Widget(sWidget, true);
+            var sr, sw, sl = tmpSWidget.l, st = tmpSWidget.t;
+            var dr, dw, dl = tmpDWidget.l, dt = tmpDWidget.t;
+            for (var r = 0, rlen = rows.length; r < rlen; r++) {
+                for (var w = 0, clen = rows[r].length; w < clen; w++) {
+                    var box = rows[r][w];
+                    if (box.id == tmpSWidget.id) {
+                        sr = r;
+                        sw = w;
+                    }
+
+                    if (box.id == tmpDWidget.id) {
+                        dr = r;
+                        dw = w;
+                    }
+                }
+            }
+
+            if (sr != null && sw != null) {
+                rows[sr][sw] = tmpDWidget;
+                rows[sr][sw].l = sl;
+                rows[sr][sw].t = st;
+            }
+
+            if (dr != null && dw != null) {
+                rows[dr][dw] = tmpSWidget;
+                rows[dr][dw].l = dl;
+                rows[dr][dw].t = dt;
+            }
+
+            renderContainer();
+        };
+
+        var dragElem = null;
+        var bindEvents = function () {
+            $('.box').on('touchstart', function (e) {
+                touchDragTime = new Date();
+                dragElem = e.target;
+            });
+            $('.box').on('touchend', function (e) {
+                var tdiff = new Date() - touchDragTime;
+                var ss = (tdiff / 1000);
+                touchDragTime = null;
+                $('.container').removeClass('dragStart');
+                $('.container').css({ top: 0 });
+                $(window).scrollTop(oldScroll);
+                dragMoving = false;
+                if (dragElem) {
+                    var destWidget = getWidgetByCords(touchX, touchY);
+                    var srcWidget = getWidgetByCords(null, null, parseInt($(dragElem).attr('box-id')));
+                    if (srcWidget && destWidget) {
+                        console.log('elemToReplace ', destWidget, ' source to remove ', srcWidget);
+                        if (srcWidget.h === destWidget.h && srcWidget.w === destWidget.w) {
+                            //swap boxes as src and dest both same type
+                            swapWidgets(srcWidget, destWidget);
+                        }
+                    }
+                    dragElem = null;
+                }
+            });
+        };
+
+
+        $(document).ready(function () {
+            containerWidth = $('.container').width();
+            boxWidth = containerWidth / 3;
+            boxHeight = boxWidth;
+
+            renderContainer();
+
+            $(window).on('touchmove', function (e) {
+                var tdiff = 0;
+                if (touchDragTime && !dragMoving) {
+                    tdiff = new Date() - touchDragTime;
+                    if (tdiff > 100) {
+                        dragMoving = true;
+                        oldScroll = $(window).scrollTop();
+                        $('.container').addClass('dragStart');
+                        $('.container').css({ top: -oldScroll });
+                    }
+                }
+                if (e.touches.length > 0) {
+                    touchX = e.touches[0].clientX;
+                    touchY = e.touches[0].clientY;
+                    if (dragMoving) {
+                        var lowerDiff = $(window).height() - touchY;
+                        if (lowerDiff < 20) {
+                            oldScroll = oldScroll + 10;
+                            $('.container').css({ top: -oldScroll });
+                        } else if (touchY < 40) {
+                            if (oldScroll - 10 >= 0) {
+                                oldScroll = oldScroll - 10;
+                                $('.container').css({ top: -oldScroll });
+                            }
+                        }
+                        //getWidgetByCords(touchX, touchY);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        ._slider * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        ._slider {
+            height: 100%;
+        }
+        
+        ._view-port {
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        ._slide-reel {
+            height: 100%;
+            clear: both;
+            position: relative;
+            transition: left 0.3s linear;
+        }
+        
+        ._slide {
+            float: left;
+            height: 100%;
+
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center
+        }
+        
+        ._slide-nav {
+            position: absolute;
+            top: 43%;
+            background-color: black;
+            color: white;
+            padding: 20px;
+            font-weight: bold;
+            opacity: 0.6;
+            text-decoration: none;
+        }
+        
+        ._slide-nav.next {
+            right: 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body onload="onLoad()">
+    <div class="container" style="width:500px; height: 500px; border: 1px solid red;">
+        <div class="_slider">
+            <div class="_view-port">
+                <div class="_slide-reel">
+                    <div class="_slide" style="background-image: url('http://www.evoketechnologies.com/images/testibg2.jpg');"></div>
+                    <div class="_slide" style="background-image: url('http://www.evoketechnologies.com/images/testibg1.jpg');"></div>
+                    <div class="_slide" style="background-image: url('http://www.evoketechnologies.com/images/testibg2.jpg');"></div>
+                    <div class="_slide" style="background-image: url('http://www.evoketechnologies.com/images/testibg1.jpg');"></div>
+                    <div class="_slide" style="background-image: url('http://www.evoketechnologies.com/images/testibg2.jpg');"></div>
+                    <div class="_slide" style="background-image: url('http://www.evoketechnologies.com/images/testibg1.jpg');"></div>
+                </div>
+                <div>
+                    <a href="javascript:void(0);" class="_slide-nav prev hidden">&lt;</a>
+                    <a href="javascript:void(0);" class="_slide-nav next hidden">&gt;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var sliderConfig = {
+            slidesToShow: 1
+        };
+        var $ = function (selector) {
+            var elem = document.querySelector(selector);
+            elem.css = getComputedStyle(elem, null);
+            return elem;
+        };
+
+        $.all = (selector) => {
+            return document.querySelectorAll(selector);
+        };
+
+        var updateNavigations = (slideIndex, noOfSlides) => {
+            console.log('slideindex ', slideIndex);
+            if (slideIndex == 0) {
+                $('._slide-nav.prev').className = $('._slide-nav.prev').className + ' hidden';
+                $('._slide-nav.next').className = $('._slide-nav.next').className.split('hidden').join(' ');
+            } else if (slideIndex > 0) {
+                $('._slide-nav.prev').className = $('._slide-nav.prev').className.split('hidden').join(' ');
+                if (slideIndex == noOfSlides - 1) {
+                    $('._slide-nav.next').className = $('._slide-nav.next').className + ' hidden';
+                } else {
+                    $('._slide-nav.next').className = $('._slide-nav.next').className.split('hidden').join(' ');
+                }
+            }
+        };
+
+        function initSlider() {
+            var slideIndex = 0;
+            var viewPortWidth = $('._view-port').css.width.replace('px', '');
+            viewPortWidth = parseFloat(viewPortWidth);
+            var slideWidth = viewPortWidth / sliderConfig.slidesToShow;
+            $.all('._slide').forEach((elem) => {
+                elem.style.width = slideWidth + 'px';
+            });
+            var noOfSlides = $.all('._slide-reel ._slide').length;
+            $('._slide-reel').style.width = (slideWidth * noOfSlides) + 'px';
+            $('._slide-reel').style.left = (slideIndex * slideWidth) + 'px';
+
+            updateNavigations(slideIndex, noOfSlides);
+
+            $('._slide-nav.next').addEventListener('click', function () {
+                if (slideIndex + 1 <= noOfSlides) {
+                    slideIndex = slideIndex + 1;
+                    $('._slide-reel').style.left = '-' + (slideIndex * slideWidth) + 'px';
+                    updateNavigations(slideIndex, noOfSlides);
+                }
+            });
+            $('._slide-nav.prev').addEventListener('click', function () {
+                if (slideIndex - 1 >= 0) {
+                    slideIndex = slideIndex - 1;
+                    $('._slide-reel').style.left = '-' + (slideIndex * slideWidth) + 'px';
+                    updateNavigations(slideIndex, noOfSlides);
+                }
+            });
+        }
+
+        var onLoad = () => {
+            initSlider();
+        };
+    </script>
+</body>
+
+</html>

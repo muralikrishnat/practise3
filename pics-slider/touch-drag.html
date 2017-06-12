@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            border: 1px solid red;
+            overflow: hidden;
+        }
+        
+        .box {
+            width: 70px;
+            height: 70px;
+            background-color: green;
+            float: left;
+            border: 1px solid black;
+        }
+        
+        .cursor {
+            border: 2px dashed grey;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+    </div>
+
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var dragElem = null;
+        var touchX, touchY;
+        var boxes = [];
+
+        var BoxClass = function (obj) {
+            this.classes = obj['classes'];
+            this.html = obj['html'];
+        };
+
+        boxes.push({ html: '1', w: 1, h: 1 });
+        boxes.push({ html: '2', w: 1, h: 1 });
+        boxes.push({ html: '3', w: 1, h: 1 });
+        boxes.push({ html: '4', w: 1, h: 1 });
+        boxes.push({ html: '4', w: 3, h: 2, fixme: true });
+        boxes.push({ html: '5', w: 1, h: 1 });
+        boxes.push({ html: '6', w: 1, h: 1 });
+        boxes.push({ html: '7', w: 1, h: 1 });
+        boxes.push({ html: '8', w: 1, h: 1 });
+
+        var renderBoxes = function () {
+            var $container = $('.container');
+            var boxWidth = $('.container').width() / 3;
+            $container.html('');
+            boxes.forEach((b, i) => {
+                var $div = $('<div/>');
+                $div.attr('box-id', i);
+                $div.addClass('box');
+                $div.css({
+                    width: (boxWidth * b.w),
+                    height: (boxWidth * b.h)
+                });
+                if (b.fixme) {
+                    $div.addClass('fixme');
+                }
+                $div.html(b.html);
+                b.elem = $div;
+                $container.append($div);
+            });
+            bindEvents();
+        };
+
+        var findElementbyCords = function (x, y) {
+            var elemPos;
+            boxes.forEach(b => {
+                var elem = b.elem;
+                if (elem) {
+                    elem.removeClass('cursor');
+                    var left = elem.offset().left;
+                    var top = elem.offset().top;
+                    var width = elem.outerWidth();
+                    var height = elem.outerHeight();
+
+                    if (x >= left && x < left + width) {
+                        if (y >= top && y < top + height) {
+                            if (!b.fixme) {
+                                elemPos = elem;
+                            }
+                        }
+                    }
+                }
+
+            });
+
+            return elemPos;
+        };
+
+        var swapBoxes = function (s, d) {
+            var tmpbox = new BoxClass(boxes[d]);
+            boxes[d] = boxes[s];
+            boxes[s] = tmpbox;
+            renderBoxes();
+        };
+        var bindEvents = function () {
+            $('.box').on('touchstart', function (e) {
+                if (e.touches.length > 0) {
+                    touchX = e.touches[0].clientX;
+                    touchY = e.touches[0].clientY;
+                }
+                if (!$(e.target).hasClass('fixme')) {
+                    dragElem = e.target;
+                } else {
+                    dragElem = null;
+                }
+            });
+
+            $('.box').on('touchend', function (e) {
+                var elem = findElementbyCords(touchX, touchY);
+                if (elem && dragElem) {
+                    var s = parseInt($(dragElem).attr('box-id'));
+                    var d = parseInt($(elem).attr('box-id'));
+                    swapBoxes(s, d);
+                }
+            });
+        };
+        $(document).ready(function () {
+            renderBoxes();
+        });
+
+        $(document).on('touchmove', function (e) {
+            if (e.touches.length > 0 && dragElem) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+                var elem = findElementbyCords(touchX, touchY);
+                if (elem) {
+                    elem.addClass('cursor');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
