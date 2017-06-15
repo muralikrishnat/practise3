@@ -1,1 +1,0 @@
-require('./fe-server')({ fePort: 3434, folder: 'ftp-ui' });
