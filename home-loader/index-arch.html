@@ -16,16 +16,16 @@
     </div>
 
     <script>
-        var $ = function (selector) {
+        var $ = function(selector) {
             return document.querySelector(selector);
         };
 
-        var getNewElement = function (elemName) {
+        var getNewElement = function(elemName) {
             return document.createElement(elemName);
         };
 
-        var setStyles = function (elem, styles) {
-            Object.keys(styles).forEach(function (key) {
+        var setStyles = function(elem, styles) {
+            Object.keys(styles).forEach(function(key) {
                 elem.style[key] = styles[key];
             });
         };
@@ -45,7 +45,7 @@
         };
     </script>
     <script>
-        var renderPoint = function (elem, opts) {
+        var renderPoint = function(elem, opts) {
             var point = getNewElement('DIV');
             point.classList = 'drag-point';
             point.setAttribute('point-order', opts.order);
@@ -61,7 +61,7 @@
                 border: '4px solid black',
                 opacity: '0.7'
             });
-            point.addEventListener('touchmove', function (evt) {
+            point.addEventListener('touchmove', function(evt) {
                 if (evt.touches.length === 1) {
                     var rect = elem.getBoundingClientRect();
                     var mX = evt.touches[0].clientX,
@@ -87,29 +87,35 @@
                 x: 100,
                 y: 100,
                 order: 1,
-                type: 1
+                type: 2
+            });
+            renderPoint(elem, {
+                x: 150,
+                y: 50,
+                order: 2,
+                type: 2
             });
             renderPoint(elem, {
                 x: 200,
                 y: 100,
-                order: 2,
-                type: 1
+                order: 3,
+                type: 2
             });
             renderPoint(elem, {
                 x: 200,
                 y: 200,
-                order: 3,
-                type: 1
+                order: 4,
+                type: 2
             });
             renderPoint(elem, {
                 x: 100,
                 y: 200,
-                order: 4,
-                type: 1
+                order: 5,
+                type: 2
             });
         }
 
-        var createSVG = function (w, h) {
+        var createSVG = function(w, h) {
             return new Promise((res, rej) => {
                 var $div = getNewElement('DIV');
                 $div.classList = 'canvas-mask'
@@ -126,13 +132,13 @@
                     left: 0
                 });
 
-                $div.addEventListener('touchstart', function (evt) {
+                $div.addEventListener('touchstart', function(evt) {
                     if (evt.touches.length === 1) {
                         console.log('holder : ', evt.touches[0].clientX, evt.touches[0].clientY);
                     }
                 }, false);
                 renderPoints($div);
-                if ($('.canvas-mask')){
+                if ($('.canvas-mask')) {
                     $('.canvas-mask').remove();
                 }
                 $('.photo-holder').append($div);
@@ -144,7 +150,7 @@
         };
     </script>
     <script>
-        var setLoader = function (isRemove) {
+        var setLoader = function(isRemove) {
             if (isRemove) {
                 if ($('.loader')) {
                     $('.loader').remove();
@@ -172,13 +178,13 @@
             }
 
         }
-        var bindCanvasEvents = function (canvas) {
-            canvas.addEventListener('touchstart', function (evt) {
+        var bindCanvasEvents = function(canvas) {
+            canvas.addEventListener('touchstart', function(evt) {
                 var mousePos = getMousePos(canvas, evt);
                 console.log('touch Start ', mousePos);
             }, false);
 
-            canvas.addEventListener('touchmove', function (evt) {
+            canvas.addEventListener('touchmove', function(evt) {
                 var mousePos = getMousePos(canvas, evt);
                 console.log('Touch move: ', mousePos);
             }, false);
@@ -188,9 +194,9 @@
             img: null,
             width: 0,
             height: 0,
-            ctx:  null
+            ctx: null
         };
-        var loadHomeImage = function () {
+        var loadHomeImage = function() {
             return new Promise((res, rej) => {
                 let img = $('.upload-image-elem');
                 if (img) {
@@ -200,14 +206,14 @@
 
                     let hCtx = hCanvas.getContext('2d');
                     canvasConfig.hCtx = hCtx;
-                    
+
                     canvasState.ctx = hCtx;
                     canvasState.width = hCanvas.width;
                     canvasState.height = hCanvas.height;
                     canvasState.img = img;
 
                     hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
-                    hCtx.drawImage(img, 0, 0, hCanvas.width, hCanvas.height);
+                    //hCtx.drawImage(img, 0, 0, hCanvas.width, hCanvas.height);
                     hCanvas.classList = 'canvas-home';
                     if ($('.photo-holder canvas')) {
                         $('.photo-holder canvas').remove();
@@ -225,29 +231,37 @@
 
         };
 
-        var reDrawCanvas = function () {
+        var reDrawCanvas = function() {
             canvasState.ctx.clearRect(0, 0, canvasState.width, canvasState.height);
             canvasState.ctx.drawImage(canvasState.img, 0, 0, canvasState.width, canvasState.height);
+           
+            drawDoorHolder(canvasState.ctx);
+        };
+
+        var drawDoorHolder = function(ctx) {
             var points = [];
             document.querySelectorAll('.drag-point').forEach((p) => {
                 var style = getComputedStyle(p, false);
                 points.push({
                     left: parseInt(style.left) + (canvasConfig.pointConfig.width / 2),
                     top: parseInt(style.top) + (canvasConfig.pointConfig.width / 2),
-                    order: p.getAttribute('point-order')
+                    order: parseInt(p.getAttribute('point-order')),
+                    type: parseInt(p.getAttribute('point-type'))
                 });
             });
-            drawDoorHolder(canvasState.ctx, points);
-        };
-
-        var drawDoorHolder = function (ctx, points) {
             if (points) {
                 ctx.beginPath();
                 points.forEach((p, index) => {
                     if (parseInt(p.order) === 1) {
                         ctx.moveTo(p.left, p.top);
                     } else {
-                        ctx.lineTo(p.left, p.top);
+                        if (p.type === 2 && (parseInt(p.order) === 2 || parseInt(p.order) === 3)) {
+                            if (parseInt(p.order) === 2) {
+                                ctx.quadraticCurveTo(p.left, p.top - 15, points[index + 1].left, points[index + 1].top);
+                            }
+                        } else {
+                            ctx.lineTo(p.left, p.top);
+                        }
                     }
                 });
                 ctx.closePath();
@@ -259,18 +273,9 @@
             }
         };
 
-        var renderCanvas = function () {
+        var renderCanvas = function() {
             loadHomeImage().then(() => {
-                var points = [];
-                document.querySelectorAll('.drag-point').forEach((p) => {
-                    var style = getComputedStyle(p, false);
-                    points.push({
-                        left: parseInt(style.left) + (canvasConfig.pointConfig.width / 2),
-                        top: parseInt(style.top) + (canvasConfig.pointConfig.width / 2),
-                        order: p.getAttribute('point-order')
-                    });
-                });
-                drawDoorHolder(canvasConfig.hCtx, points);
+                drawDoorHolder(canvasConfig.hCtx);
                 setLoader(true);
             });
         };
@@ -281,7 +286,7 @@
             e
         }) {
             var img = new Image();
-            img.onload = function () {
+            img.onload = function() {
                 if (window.innerWidth > window.innerHeight) {
                     img.width = window.innerHeight;
                 } else {
@@ -303,7 +308,7 @@
         function handleImage(e) {
             setLoader();
             var reader = new FileReader();
-            reader.onload = function (event) {
+            reader.onload = function(event) {
                 canvasConfig.imgSrc = event.target['result'];
                 loadImageToElem({
                     e
