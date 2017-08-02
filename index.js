@@ -1,5 +1,5 @@
 // require('./fe-server')({ fePort: 3434, folder: 'react-practise' });
-require('./fe-server')({ fePort: 3435, folder: 'pics-slider' });
+require('./fe-server')({ fePort: 3435, folder: 'home-loader' });
 
 
 // var { createServer } = require('http');

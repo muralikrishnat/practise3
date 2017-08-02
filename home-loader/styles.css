@@ -1,0 +1,22 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+.photo-holder {
+    position: relative;
+}
+.upload-image-elem {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.loader {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: .7;
+}
